@@ -11,13 +11,32 @@ print("6 - Salir de la agenda \n")
 eleccion = input("¿Cual sera su elección? \n")
 eleccioncorr = int (eleccion)
 
+def modificar_contacto(nombre_buscado, nuevos_datos, datosagenda_csv):
+    # Leer los datos del archivo CSV
+    with open(datosagenda_csv, mode='r', newline='', encoding='utf-8') as archivo:
+        lector = csv.reader(archivo)
+        contactos = list(lector)
+
+    # Modificar el contacto
+    for i, contacto in enumerate(contactos):
+        if contacto[0] == nombre_buscado:  # Suponiendo que el nombre está en la primera columna
+            contactos[i] = nuevos_datos  # Reemplazamos la fila con los nuevos datos
+            break
+
+    # Escribir los datos de nuevo en el archivo CSV
+    with open(datosagenda_csv, mode='w', newline='', encoding='utf-8') as archivo:
+        escritor = csv.writer(archivo)
+        escritor.writerows(contactos)
+
+
 if eleccioncorr == 1:
     with open("datosagenda.csv", 'a', newline="") as archivoCSV:
         contenidoNuevo = csv.writer(archivoCSV, delimiter=";")
         contacto = input("Danos la informacion del contacto en este formato : Nombre Apellidos Email Telefono1 Telefono2  Direccion \n")
-        contenidoNuevo.writerow([contacto])
+        contenidoNuevo.writerow(contacto.split())
 elif eleccioncorr == 2:
-    print("por hacer")
+    pregunta = input("Dime el nombre de la persona que quieras cambiar y el telefono a cambiar \n")
+    modificar_contacto(pregunta.split())
 elif eleccioncorr == 3:
     print("por hacer")
 elif eleccioncorr == 4:
@@ -28,18 +47,3 @@ elif eleccioncorr == 6:
     print("Muchas gracias por usar la agenda!")
 
 
-def modificar_contacto(contactos, nombre, nuevo_telefono):
-    for contacto in contactos:
-        if contacto['nombre'] == nombre:
-            contacto['telefono'] = nuevo_telefono
-            print(f"Contacto {nombre} modificado.")
-            return True
-    print(f"Contacto {nombre} no encontrado.")
-    return False
-
-def guardar_contactos(archivo, contactos):
-    with open(archivo, mode='w', newline='') as f:
-        campos = ['nombre', 'telefono', 'email']
-        escritor = csv.DictWriter(f, fieldnames=campos)
-        escritor.writeheader()
-        escritor.writerows(contactos)
