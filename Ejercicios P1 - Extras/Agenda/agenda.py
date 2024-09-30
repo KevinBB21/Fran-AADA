@@ -1,49 +1,135 @@
 import csv
 
-print("Eliga una opcion de esta agenda \n")
-print("1 - Guardar datos de un contacto \n")
-print("2 - Modificar datos de un contacto \n")
-print("3 - Dar de baja un contacto \n")
-print("4 - Buscar un contacto \n")
-print("5 - Mostrar la lista de contactos ordenada \n")
-print("6 - Salir de la agenda \n")
+CSV_FILE = 'agenda.csv'
+FIELDS = ['Nombre', 'Apellidos', 'Email', 'Telefono1', 'Telefono2', 'Direccion']
 
-eleccion = input("¿Cual sera su elección? \n")
-eleccioncorr = int (eleccion)
-
-def modificar_contacto(nombre_buscado, nuevos_datos, datosagenda_csv):
-    # Leer los datos del archivo CSV
-    with open(datosagenda_csv, mode='r', newline='', encoding='utf-8') as archivo:
-        lector = csv.reader(archivo)
-        contactos = list(lector)
-
-    # Modificar el contacto
-    for i, contacto in enumerate(contactos):
-        if contacto[0] == nombre_buscado:  # Suponiendo que el nombre está en la primera columna
-            contactos[i] = nuevos_datos  # Reemplazamos la fila con los nuevos datos
+def mostrarMenu():
+    opcion = 0
+    while opcion > 3 or opcion < 1:
+        print("1. Guardar un nuevo contacto")
+        print("2. Modificar un contacto")
+        print("3. Eliminar un contacto")
+        print("4. Buscar un contacto")
+        print("5. Mostrar contactos")
+        print("6. Salir del menú")
+        opcion = int(input())
+        if opcion == 1:
+            crearContacto()
+            opcion = 0
+        elif opcion == 2:
+            modificarContacto()
+            opcion = 0
+        elif opcion == 3:
+            eliminarContacto()
+            opcion = 0
+        elif opcion == 4:
+            buscarContacto()
+            opcion = 0
+        elif opcion == 5:
+            muestraContacto()
+            opcion = 0
+        elif opcion == 6:
             break
 
-    # Escribir los datos de nuevo en el archivo CSV
-    with open(datosagenda_csv, mode='w', newline='', encoding='utf-8') as archivo:
-        escritor = csv.writer(archivo)
-        escritor.writerows(contactos)
 
 
-if eleccioncorr == 1:
-    with open("datosagenda.csv", 'a', newline="") as archivoCSV:
-        contenidoNuevo = csv.writer(archivoCSV, delimiter=";")
-        contacto = input("Danos la informacion del contacto en este formato : Nombre Apellidos Email Telefono1 Telefono2  Direccion \n")
-        contenidoNuevo.writerow(contacto.split())
-elif eleccioncorr == 2:
-    pregunta = input("Dime el nombre de la persona que quieras cambiar y el telefono a cambiar \n")
-    modificar_contacto(pregunta.split())
-elif eleccioncorr == 3:
-    print("por hacer")
-elif eleccioncorr == 4:
-    print("por hacer")
-elif eleccioncorr == 5:
-    print("por hacer")
-elif eleccioncorr == 6:
-    print("Muchas gracias por usar la agenda!")
+def crearContacto():
+    csvfile = open(CSV_FILE, 'a', newline='')
+    writer = csv.writer(csvfile, delimiter=';')
+
+    print("Inserte los datos de contacto")
+    nombre = str(input("Nombre: "))
+    apellido = str(input("Apellido: "))
+    email = str(input("Email: "))
+    telefono1 = str(input("Primer Telefono: "))
+    telefono2 = str(input("Segundo Telefono:"))
+    direccion = str("Calle " + input("Direccion: "))
+    writer = writer.writerow([nombre, apellido, email, telefono1,
+                              telefono2, direccion])
+    csvfile.close()
+
+def modificarContacto():
+    nombre = input("Ingrese el nombre del contacto a modificar: ")
+    apellido = input("Ingrese los apellidos del contacto a modificar: ")
+    encontrado = False
+    newrows = []
+
+    with open(CSV_FILE, 'r', newline='') as csvfile:
+        reader = csv.DictReader(csvfile, delimiter=";")
+        for row in reader:
+            if row['Nombre'] == nombre and row['Apellidos'] == apellido:
+
+                email = input("Ingrese el nuevo email: ")
+                telefono1 = input("Ingrese el nuevo teléfono 1: ")
+                telefono2 = input("Ingrese el nuevo teléfono 2: ")
+                direccion = input("Ingrese la nueva dirección: ")
+
+                row['Email'] = email
+                row['Telefono1'] = telefono1
+                row['Telefono2'] = telefono2
+                row['Direccion'] = direccion
+
+                encontrado = True
+
+            newrows.append(row)
+        print(newrows)
+    if not encontrado:
+        print("Este contacto no esta en la agenda")
+    else:
+        with open(CSV_FILE, 'w', newline='') as csvnewfile:
+            writer = csv.DictWriter(csvnewfile, fieldnames=FIELDS, delimiter=";")
+            writer.writeheader()
+            writer.writerows(newrows)
+            print("Contacto modificado correctamente")
+
+def eliminarContacto():
+    nombre = input("Ingrese el nombre del contacto a eliminar: ")
+    apellidos = input("Ingrese los apellidos del contacto a eliminar: ")
+    encontrado = False
+    newrows = []
+
+    with open(CSV_FILE, 'r', newline='') as csvfile:
+        reader = csv.DictReader(csvfile, delimiter=";")
+
+        for row in reader:
+            if row['Nombre'] == nombre and row['Apellidos'] == apellidos:
+                encontrado = True
+            else:
+                newrows.append(row)
+
+    if not encontrado:
+        print("Este contacto no esta en la agenda")
+    else:
+        with open(CSV_FILE, 'w', newline='') as csvnewfile:
+            writer = csv.DictWriter(csvnewfile, fieldnames=FIELDS, delimiter=";")
+            writer.writeheader()
+            writer.writerows(newrows)
+        print("Contacto eliminado correctamente")
+
+def buscarContacto():
+    nombre = input("Ingrese el nombre del contacto a buscar: ")
+    apellidos = input("Ingrese los apellidos del contacto a buscar: ")
+    encontrado = False
+    with open(CSV_FILE, 'r', newline='') as csvfile:
+        reader = csv.DictReader(csvfile, delimiter=";")
+        for row in reader:
+
+            if row['Nombre'] == nombre and row['Apellidos'] == apellidos:
+                print(list(row.values()))
+                encontrado = True
+                break
+        if not encontrado:
+            print("Este contacto no esta en la agenda")
 
 
+def muestraContacto():
+
+    with open(CSV_FILE, 'r', newline='') as csvfile:
+        contactos = []
+
+        reader = csv.DictReader(csvfile, delimiter=";")
+        for row in reader:
+            contactos.append(list(row.values()))
+        print(sorted(contactos))
+
+mostrarMenu()
